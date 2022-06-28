@@ -15,14 +15,14 @@ class Json extends AbstractValidator
     public const INVALID = 'jsonInvalid';
 
     /**
-     * @var array<string|string>
+     * @var array<string, string>
      */
     protected array $messageTemplates = [
         self::INVALID => "Json is invalid: %reason%",
     ];
 
     /**
-     * @var array<string|string>
+     * @var array<string, string>
      */
     protected array $messageVariables = [
         'reason' => 'reason',

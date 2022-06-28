@@ -19,7 +19,7 @@ class PhoneNumberCZSK extends AbstractValidator
     public const UNSUPPORTED            = 'phoneNumberUnsupported';
 
     /**
-     * @var array<string|string>
+     * @var array<string, string>
      */
     protected array $messageTemplates = [
         self::INVALID                => 'Invalid type given. String expected',
@@ -29,7 +29,7 @@ class PhoneNumberCZSK extends AbstractValidator
     ];
 
     /**
-     * @var array<string|string>
+     * @var array<string, string>
      */
     protected array $patterns = [
         'cs-CZ' => "/^(\+?420)? ?[1-9][0-9]{2} ?[0-9]{3} ?[0-9]{3}$/",

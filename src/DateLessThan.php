@@ -76,9 +76,6 @@ class DateLessThan extends AbstractValidator
         return true;
     }
 
-    /**
-     * Sets the max option
-     */
     public function setMax(string $max): self
     {
         $this->options['max'] = $max;
@@ -86,11 +83,6 @@ class DateLessThan extends AbstractValidator
         return $this;
     }
 
-    /**
-     * Returns the max option
-     *
-     * @return string
-     */
     public function getMax(): string
     {
         if (empty($this->options['max'])) {
@@ -105,9 +97,6 @@ class DateLessThan extends AbstractValidator
         return $this->options['max'];
     }
 
-    /**
-     * Sets the inclusive option
-     */
     public function setInclusive(bool $inclusive): self
     {
         $this->options['inclusive'] = $inclusive;
@@ -115,9 +104,6 @@ class DateLessThan extends AbstractValidator
         return $this;
     }
 
-    /**
-     * Returns the inclusive option
-     */
     public function getInclusive(): bool
     {
         return $this->options['inclusive'];

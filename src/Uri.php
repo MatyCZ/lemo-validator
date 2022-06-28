@@ -1,6 +1,6 @@
 <?php
 
-namespace LemoBase\Validator;
+namespace Lemo\Validator;
 
 use Laminas\Validator\AbstractValidator;
 
@@ -15,6 +15,9 @@ class Uri extends AbstractValidator
     public const INVALID_SCHEME   = 'invalidScheme';
     public const INVALID_USERINFO = 'invalidUserInfo';
 
+    /**
+     * @var array<string, string>
+     */
     protected array $messageTemplates = [
         self::INVALID          => "The value is not a valid uri. Use the basic format scheme://host/",
         self::INVALID_FRAGMENT => "'%fragment%' is not a valid fragment",
@@ -26,6 +29,9 @@ class Uri extends AbstractValidator
         self::INVALID_USERINFO => "'%userinfo%' is not a valid useinfo",
     ];
 
+    /**
+     * @var array<string, string>
+     */
     protected array $messageVariables = [
         'fragment' => 'fragment',
         'host'     => 'host',
@@ -47,7 +53,7 @@ class Uri extends AbstractValidator
     /**
      * Returns true if $value is valid URI
      *
-     * @param  string $value
+     * @param  mixed $value
      * @return bool
      */
     public function isValid($value): bool

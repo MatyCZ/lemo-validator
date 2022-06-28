@@ -18,7 +18,7 @@ class BirthNumberCZMinorChild extends AbstractValidator
     public const NOT_MINORCHILD  = 'notMinorChild';
 
     /**
-     * @var array<string|string>
+     * @var array<string, string>
      */
     protected array $messageTemplates = [
         self::INVALID         => "Invalid type given. String or integer expected",

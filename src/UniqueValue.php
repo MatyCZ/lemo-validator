@@ -1,58 +1,56 @@
 <?php
 
-namespace LemoBase\Validator;
+namespace Lemo\Validator;
 
 use Laminas\Validator\AbstractValidator;
+use Traversable;
 
-use function array_key_exists;
-use function is_array;
-use function is_int;
+use function in_array;
+use function is_scalar;
 use function is_string;
+use function mb_strtolower;
+use function sprintf;
 
 class UniqueValue extends AbstractValidator
 {
     public const INVALID = 'valueInvalid';
     public const NOT_UNIQUE = 'valueNotUnique';
 
+    /**
+     * @var array<string, string>
+     */
     protected array $messageTemplates = [
-        self::INVALID => "Invalid type given. String or integer expected",
+        self::INVALID => "Invalid type given. Boolean, float, integer, or string expected",
         self::NOT_UNIQUE => "Value must be unique",
     ];
 
-    protected bool $caseSensitive = false;
-    protected array $haystack = [];
+    /** @var array{caseSensitive: bool, haystack: array<bool|float|int|string>|null, strict: bool} */
+    protected $options = [
+        'caseSensitive' => false,
+        'haystack' => null,
+        'strict' => false,
+    ];
 
-    public function __construct($options = array())
+    /**
+     * @param Traversable<string, array<string>|bool>|array{caseSensitive: bool, haystack: array<bool|float|int|string>|null, strict: bool}|null $options
+     */
+    public function __construct(Traversable|array|null $options = null)
     {
-        if (array_key_exists('haystack', $options) && is_array($options['haystack'])) {
-            $this->setHaystack($options['haystack']);
-        }
-
-        if (array_key_exists('case_sensitive', $options) && true === $options['case_sensitive']) {
-            $this->setCaseSensitive(true);
-        }
-
         parent::__construct($options);
     }
 
     /**
-     * If value is unique oposit the haystack, returns true
-     *
-     * @param  string $value
+     * @param  mixed $value
      * @return bool
      */
     public function isValid($value): bool
     {
-        if (!is_string($value) && !is_int($value)) {
+        if (!is_scalar($value)) {
             $this->error(self::INVALID);
             return false;
         }
 
-        if (empty($this->haystack)) {
-            return true;
-        }
-
-        if ($this->inArray($value, $this->haystack)) {
+        if ($this->isValidAgainstHaystack($value)) {
             $this->error(self::NOT_UNIQUE);
             return false;
         }
@@ -60,12 +58,25 @@ class UniqueValue extends AbstractValidator
         return true;
     }
 
+    protected function isValidAgainstHaystack(mixed $value): bool
+    {
+        $caseSensitive = $this->getCaseSensitive();
+        $haystack = $this->getHaystack();
+        $strict = $this->getStrict();
+
+        if (true === $caseSensitive) {
+            return in_array($value, $haystack, $strict);
+        }
+
+        return in_array(
+            $this->toLower($value),
+            $this->toLowerHaystack($haystack),
+            $strict
+        );
+    }
+
     /**
      * Lower string multibyte by default
-     *
-     * @param  string $string
-     * @param  string $encoding
-     * @return string
      */
     protected function toLower(string $string, string $encoding = 'UTF-8'): string
     {
@@ -73,74 +84,71 @@ class UniqueValue extends AbstractValidator
     }
 
     /**
-     * Lower string on all levels of array
+     * Lower strings on all levels of array
      *
-     * @param  array $array
-     * @return array
+     * @param  array<bool|float|int|string> $array
+     * @return array<bool|float|int|string>
      */
-    protected function arrayToLower(array $array): array
+    protected function toLowerHaystack(array $array): array
     {
         foreach ($array as &$value) {
-            switch (true) {
-                case is_string($value):
-                    $value = $this->toLower($value);
-                    break;
-                case is_array($value):
-                    $value = $this->arrayToLower($value);
-                    break;
+            if (is_string($value)) {
+                $value = $this->toLower($value);
             }
         }
 
         return $array;
     }
 
-    /**
-     * In array comparsion, case insensitive by default
-     *
-     * @param  string|array $needle
-     * @param  string|array $haystack
-     * @param  bool         $caseSensitive
-     * @param  bool         $strict
-     * @return bool
-     */
-    protected function inArray($needle, $haystack, bool $caseSensitive = false, bool $strict = false): bool
-    {
-        switch ($caseSensitive) {
-            case true:
-                return in_array($needle, $haystack, $strict);
-            default:
-            case false:
-                if (is_array($needle)) {
-                    return in_array($this->arrayToLower($needle), $this->arrayToLower($haystack), $strict);
-                } else {
-                    return in_array($this->toLower($needle), $this->arrayToLower($haystack), $strict);
-                }
-        }
-    }
-
-    /**
-     * Set case sensitive comparsion
-     *
-     * @param  bool $caseSensitive
-     * @return self
-     */
     public function setCaseSensitive(bool $caseSensitive): self
     {
-        $this->caseSensitive = $caseSensitive;
+        $this->options['caseSensitive'] = $caseSensitive;
 
         return $this;
     }
 
+    public function getCaseSensitive(): bool
+    {
+        return $this->options['caseSensitive'];
+    }
+
     /**
-     * Set haystack for comparsion
-     *
-     * @param  array $values
+     * @param  array<string> $values
      * @return self
      */
     public function setHaystack(array $values): self
     {
-        $this->haystack = $values;
+        $this->options['haystack'] = $values;
 
         return $this;
+    }
+
+    /**
+     * @return array<bool|float|int|string>
+     */
+    public function getHaystack(): array
+    {
+        if (empty($this->options['haystack'])) {
+            throw new Exception\InvalidArgumentException(
+                sprintf(
+                    '%s expects a "haystack" option; none given',
+                    self::class
+                )
+            );
+        }
+
+        return $this->options['haystack'];
+    }
+
+    public function setStrict(bool $strict): self
+    {
+        $this->options['strict'] = $strict;
+
+        return $this;
+    }
+
+    public function getStrict(): bool
+    {
+        return $this->options['strict'];
     }
 }

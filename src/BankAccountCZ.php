@@ -21,7 +21,7 @@ class BankAccountCZ extends AbstractValidator
     /**
      * Číselník bankovních kódů k datu 1.2.2014 (zdroj ČNB)
      *
-     * @var array<string|string>
+     * @var array<int|string, string>
      */
     protected array $bankCodes = [
         '0100' => 'Komerční banka, a.s.',
@@ -77,7 +77,7 @@ class BankAccountCZ extends AbstractValidator
     ];
 
     /**
-     * @var array<string|string>
+     * @var array<string, string>
      */
     protected array $messageTemplates = [
         self::INVALID_INPUT => 'Invalid input',

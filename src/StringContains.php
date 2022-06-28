@@ -21,7 +21,7 @@ class StringContains extends AbstractValidator
     public const NO_SMALL_LETTER     = 'noSmallLetter';
 
     /**
-     * @var array<string|string>
+     * @var array<string, string>
      */
     protected array $messageTemplates = [
         self::NO_ALPHA            => 'Value must contain at least one alphabetic character',

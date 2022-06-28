@@ -12,13 +12,13 @@ use function preg_quote;
 use function sprintf;
 use function str_pad;
 
-class IdentificationNumberCZ extends AbstractValidator
+class CompanyIdentificationNumberCZ extends AbstractValidator
 {
     public const INVALID = 'identificationNumberInvalid';
     public const NOT_IDENTIFICATIONNUMBER = 'notIdentificationNumber';
 
     /**
-     * @var array<string|string>
+     * @var array<string, string>
      */
     protected array $messageTemplates = [
         self::INVALID => "Invalid type given. String or integer expected",

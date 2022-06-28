@@ -19,6 +19,7 @@
     }
   },
   "require": {
+    "laminas/laminas-uri": "^2.9",
     "laminas/laminas-validator": "^2.20",
     "php": "^8.0"
   },
@@ -27,6 +28,6 @@
     "phpstan/phpstan": "~1.7.0"
   },
   "scripts": {
-    "static-analysis": "phpstan analyse -c phpstan.neon --memory-limit=4G"
+    "static-analysis": "phpstan analyse -c phpstan.neon"
   }
 }
