@@ -44,7 +44,7 @@ class StringContains extends AbstractValidator
      * string - valid characters
      * int - 1 .. 128 ASCII characters
      *
-     * @param Traversable<string, bool|string>|array{inclusive: bool, max: string}|null $options
+     * @param Traversable<string, bool|string>|array{characters: int|string|null, requireAlpha: bool, requireCapitalLetter: bool, requireNumeric: bool, requireSmallLetter: bool}|null $options
      */
     public function __construct(Traversable|array|null $options = null)
     {
