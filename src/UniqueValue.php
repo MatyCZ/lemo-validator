@@ -32,7 +32,7 @@ class UniqueValue extends AbstractValidator
     ];
 
     /**
-     * @param Traversable<string, array<string>|bool>|array{caseSensitive: bool, haystack: array<bool|float|int|string>|null, strict: bool}|null $options
+     * @param Traversable<string, array<string>|bool>|array{caseSensitive?: bool, haystack?: array<bool|float|int|string>|null, strict?: bool}|null $options
      */
     public function __construct(Traversable|array|null $options = null)
     {

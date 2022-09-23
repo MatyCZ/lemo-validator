@@ -43,7 +43,7 @@ class PhoneNumberCZSK extends AbstractValidator
     ];
 
     /**
-     * @param Traversable<string, array<string>|bool|string>|array{locale: array<string>|string, strict: bool, }|null $options
+     * @param Traversable<string, array<string>|bool|string>|array{locale?: array<string>|string, strict?: bool, }|null $options
      */
     public function __construct(Traversable|array|null $options = null)
     {

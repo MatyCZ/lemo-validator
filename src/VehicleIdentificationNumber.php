@@ -88,7 +88,7 @@ class VehicleIdentificationNumber extends AbstractValidator
     ];
 
     /**
-     * @param Traversable<string, bool>|array{strict: bool}|null $options
+     * @param Traversable<string, bool>|array{strict?: bool}|null $options
      */
     public function __construct(Traversable|array|null $options = null)
     {
