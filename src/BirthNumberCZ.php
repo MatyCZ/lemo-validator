@@ -68,37 +68,51 @@ class BirthNumberCZ extends AbstractValidator
             return false;
         }
 
-        [, $year, $month, $day, $ext, $c] = $matches;
+        // Vypocteme si delku retezce
+        $length = strlen($value);
 
+        // Naparsujeme si hodnoty
+        [, $yearParsed, $monthParsed, $dayParsed, $ext, $checkDigitParsed] = $matches;
+
+        // Prevedeme naparsovane hodnoty na cisla
+        $checkDigit = (int) $checkDigitParsed;
+        $day = (int) $dayParsed;
+        $month = (int) $monthParsed;
+        $year = (int) $yearParsed;
+
+        // Urcime si maximalni a minimalni rok
         $yearMax = (int) date('Y');
-        $yearMin = (int) date('Y', strtotime('-100 YEARS'));
+        $yearMin = (int) date('Y', strtotime('-101 YEARS'));
+
+        // Urcime si modulo
+        $modulo = intval($yearParsed . $monthParsed . $dayParsed . $ext) % 11;
+        if (10 === $modulo) {
+            $modulo = 0;
+        }
 
         // Osetreni roku
-        if (9 === strlen($value) || 10 === strlen($value) && $year >= 54) {
+        if (9 === $length || (10 === $length && $year >= 54)) {
             $year += 1900;
         } else {
             $year += 2000;
         }
 
+        // Osetreni maximalniho roku
         if ($year > $yearMax) {
             $year -= 100;
         }
 
+        // Osetreni minimalniho roku
         if ($year < $yearMin) {
             $year += 100;
         }
 
         // Do roku 1954 pridelovano 9 mistne RC nelze overit
-        if ($c === '' && $year < 1954) {
+        if (9 === $length && $year < 1954) {
             return true;
         }
 
-        // Kontrolni cislice
-        $mod = ($year . $month . $day . $ext) % 11;
-        if ($mod === 10) {
-            $mod = 0;
-        }
-        if ($mod !== (int) $c) {
+        if (9 === $length || $modulo !== $checkDigit) {
             $this->error(self::NOT_BIRTHNUMBER);
             return false;
         }
@@ -117,11 +131,7 @@ class BirthNumberCZ extends AbstractValidator
             return false;
         }
 
-        if ($day <= 31 && $month <= 12 && $year >= $yearMin && $year <= $yearMax) {
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     /**
