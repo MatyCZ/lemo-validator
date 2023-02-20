@@ -70,8 +70,26 @@ class BirthNumberCZ extends AbstractValidator
 
         [, $year, $month, $day, $ext, $c] = $matches;
 
+        $yearMax = (int) date('Y');
+        $yearMin = (int) date('Y', strtotime('-100 YEARS'));
+
+        // Osetreni roku
+        if (9 === strlen($value) || 10 === strlen($value) && $year >= 54) {
+            $year += 1900;
+        } else {
+            $year += 2000;
+        }
+
+        if ($year > $yearMax) {
+            $year -= 100;
+        }
+
+        if ($year < $yearMin) {
+            $year += 100;
+        }
+
         // Do roku 1954 pridelovano 9 mistne RC nelze overit
-        if ($c === '') {
+        if ($c === '' && $year < 1954) {
             return true;
         }
 
@@ -84,9 +102,6 @@ class BirthNumberCZ extends AbstractValidator
             $this->error(self::NOT_BIRTHNUMBER);
             return false;
         }
-
-        // Kontrola data
-        $year += $year < 54 ? 2000 : 1900;
 
         // K mesici muze byt pricteno 20, 50 nebo 70
         if ($month > 70 && $year > 2003) {
@@ -102,7 +117,11 @@ class BirthNumberCZ extends AbstractValidator
             return false;
         }
 
-        return true;
+        if ($day <= 31 && $month <= 12 && $year >= $yearMin && $year <= $yearMax) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
