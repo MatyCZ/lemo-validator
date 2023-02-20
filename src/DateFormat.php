@@ -39,7 +39,7 @@ class DateFormat extends AbstractValidator
     ];
 
     /**
-     * @param Traversable<string, string>|array{format: string}|null $options
+     * @param Traversable<string, string>|array{format?: string}|null $options
      */
     public function __construct(Traversable|array|null $options = null)
     {

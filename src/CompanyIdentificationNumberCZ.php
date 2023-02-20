@@ -31,7 +31,7 @@ class CompanyIdentificationNumberCZ extends AbstractValidator
     ];
 
     /**
-     * @param Traversable<string, array<string>>|array{exclude: array<string>}|null $options
+     * @param Traversable<string, array<string>>|array{exclude?: array<string>}|null $options
      */
     public function __construct(Traversable|array|null $options = null)
     {

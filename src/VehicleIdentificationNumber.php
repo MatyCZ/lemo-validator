@@ -88,7 +88,7 @@ class VehicleIdentificationNumber extends AbstractValidator
     ];
 
     /**
-     * @param Traversable<string, bool>|array{strict: bool}|null $options
+     * @param Traversable<string, bool>|array{strict?: bool}|null $options
      */
     public function __construct(Traversable|array|null $options = null)
     {
@@ -130,7 +130,9 @@ class VehicleIdentificationNumber extends AbstractValidator
         if (true === $result && true === $this->getStrict() && 17 === $valueLength) {
             $currentCn = mb_substr($value, 8, 1, 'utf8');
 
-            if (preg_match('~^[0-9X]{1}$~', $currentCn)) {
+            if (preg_match('~^[1-5]{3}~', $value)
+                && preg_match('~^[0-9X]{1}$~', $currentCn)
+            ) {
                 $sum = 0;
                 for ($i = 1; $i < 18; $i++) {
                     if (9 === $i) {

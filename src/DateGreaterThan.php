@@ -38,7 +38,7 @@ class DateGreaterThan extends AbstractValidator
     ];
 
     /**
-     * @param Traversable<string, bool|string>|array{inclusive: bool, min: string}|null $options
+     * @param Traversable<string, bool|string>|array{inclusive?: bool, min?: string}|null $options
      */
     public function __construct(Traversable|array|null $options = null)
     {
