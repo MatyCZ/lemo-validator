@@ -51,6 +51,7 @@ class BankAccountCZ extends AbstractValidator
         '6200' => 'COMMERZBANK Aktiengesellschaft, pobočka Praha',
         '6210' => 'mBank S.A., organizační složka',
         '6300' => 'BNP Paribas S.A., pobočka Česká republika',
+        '6363' => 'Partners Banka, a.s.',
         '6700' => 'Všeobecná úverová banka a.s., pobočka Praha; zkráceně: VUB, a.s., pobočka Praha',
         '6800' => 'Sberbank CZ, a.s.',
         '7101' => 'Privatbanka, a.s., pobočka Česká republika',

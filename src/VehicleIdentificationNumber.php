@@ -18,7 +18,6 @@ class VehicleIdentificationNumber extends AbstractValidator
     public const VIN_INVALID_CHARS  = 'vinInvalidChars';
     public const VIN_INVALID_LENGTH = 'vinInvalidLength';
     public const VIN_INVALID_CN     = 'vinInvalidCn';
-    public const VIN_TOO_LONG       = 'vinTooLong';
 
     /**
      * @var array<string, string>
@@ -28,13 +27,12 @@ class VehicleIdentificationNumber extends AbstractValidator
         self::VIN_INVALID_CHARS  => "The value contains invalid characters",
         self::VIN_INVALID_LENGTH => "Invalid value length",
         self::VIN_INVALID_CN     => "Invalid control number",
-        self::VIN_TOO_LONG       => "The value is greater than 17 characters"
     ];
 
     /**
      * @var array<string, int>
      */
-    protected array $charValues = [
+    private array $charValues = [
         'A' => 1,
         'J' => 1,
         'B' => 2,
@@ -63,7 +61,7 @@ class VehicleIdentificationNumber extends AbstractValidator
     /**
      * @var array<int, int>
      */
-    protected array $charWeights = [
+    private array $charWeights = [
         1  => 8,
         2  => 7,
         3  => 6,
@@ -82,14 +80,6 @@ class VehicleIdentificationNumber extends AbstractValidator
         17 => 2,
     ];
 
-    /** @var array{strict: bool} */
-    protected $options = [
-        'strict' => false, // Validate control number and length
-    ];
-
-    /**
-     * @param Traversable<string, bool>|array{strict?: bool}|null $options
-     */
     public function __construct(Traversable|array|null $options = null)
     {
         parent::__construct($options);
@@ -108,66 +98,59 @@ class VehicleIdentificationNumber extends AbstractValidator
             return false;
         }
 
-        $result = true;
         $value = (string) $value;
 
         $valueLength = mb_strlen($value, 'utf8');
-        if ($valueLength > 17) {
-            $this->error(self::VIN_TOO_LONG);
-            $result = false;
-        }
-
-        if ($valueLength > 8 && $valueLength < 17 || true === $this->getStrict() && 17 !== $valueLength) {
+        if (17 !== $valueLength) {
             $this->error(self::VIN_INVALID_LENGTH);
-            $result = false;
+
+            return false;
         }
 
-        if (!preg_match('~^[0-9A-Z]+$~', $value) || preg_match('~(I|Q|O)~', $value)) {
+        if (!preg_match('~^[0-9A-Z]+$~', $value) || preg_match('~([IQO])~', $value)) {
             $this->error(self::VIN_INVALID_CHARS);
-            $result = false;
+
+            return false;
         }
 
-        if (true === $result && true === $this->getStrict() && 17 === $valueLength) {
-            $currentCn = mb_substr($value, 8, 1, 'utf8');
+        $currentCn = mb_substr($value, 8, 1, 'utf8');
 
-            if (preg_match('~^[1-5]{3}~', $value)
-                && preg_match('~^[0-9X]{1}$~', $currentCn)
-            ) {
-                $sum = 0;
-                for ($i = 1; $i < 18; $i++) {
-                    if (9 === $i) {
-                        continue;
-                    }
-
-                    $char = mb_substr($value, $i - 1, 1, 'utf8');
-                    $charValue = $this->getCharValue($char);
-
-                    if (null === $charValue) {
-                        $this->error(self::VIN_INVALID_CHARS);
-                        $result = false;
-                        break;
-                    }
-
-                    $sum += $charValue * $this->charWeights[$i];
+        if (preg_match('~^[1-5]~', $value)
+            || preg_match('~^[0-9X]$~', $currentCn)
+        ) {
+            $sum = 0;
+            for ($i = 1; $i < 18; $i++) {
+                if (9 === $i) {
+                    continue;
                 }
 
-                $cn = $sum % 11;
-                if (0 === strcmp((string) $cn, '10')) {
-                    $cn = 'X';
-                }
+                $char = mb_substr($value, $i - 1, 1, 'utf8');
+                $charValue = $this->getCharValue($char);
 
-                if (0 !== strcmp((string) $cn, $currentCn)) {
-                    $this->error(self::VIN_INVALID_CN);
+                if (null === $charValue) {
+                    $this->error(self::VIN_INVALID_CHARS);
                     $result = false;
+                    break;
                 }
+
+                $sum += $charValue * $this->charWeights[$i];
+            }
+
+            $cn = $sum % 11;
+            if (0 === strcmp((string) $cn, '10')) {
+                $cn = 'X';
+            }
+
+            if (0 !== strcmp((string) $cn, $currentCn)) {
+                $this->error(self::VIN_INVALID_CN);
+
+                return false;
             }
         }
 
-        if (true === $result) {
-            $this->setValue($value);
-        }
+        $this->setValue($value);
 
-        return $result;
+        return true;
     }
 
     /**
@@ -185,17 +168,5 @@ class VehicleIdentificationNumber extends AbstractValidator
         }
 
         return null;
-    }
-
-    public function setStrict(bool $strict): self
-    {
-        $this->options['strict'] = $strict;
-
-        return $this;
-    }
-
-    public function getStrict(): bool
-    {
-        return $this->options['strict'];
     }
 }
