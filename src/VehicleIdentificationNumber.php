@@ -115,9 +115,7 @@ class VehicleIdentificationNumber extends AbstractValidator
 
         $currentCn = mb_substr($value, 8, 1, 'utf8');
 
-        if (preg_match('~^[1-5]~', $value)
-            || preg_match('~^[0-9X]$~', $currentCn)
-        ) {
+        if (preg_match('~^[1-5]~', $value)) {
             $sum = 0;
             for ($i = 1; $i < 18; $i++) {
                 if (9 === $i) {
@@ -129,8 +127,8 @@ class VehicleIdentificationNumber extends AbstractValidator
 
                 if (null === $charValue) {
                     $this->error(self::VIN_INVALID_CHARS);
-                    $result = false;
-                    break;
+
+                    return false;
                 }
 
                 $sum += $charValue * $this->charWeights[$i];
