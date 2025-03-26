@@ -7,6 +7,7 @@ use Traversable;
 
 use function intval;
 use function is_numeric;
+use function is_scalar;
 use function mb_strlen;
 use function mb_substr;
 use function preg_match;
@@ -32,7 +33,7 @@ class VehicleIdentificationNumber extends AbstractValidator
     /**
      * @var array<string, int>
      */
-    private array $charValues = [
+    protected array $charValues = [
         'A' => 1,
         'J' => 1,
         'B' => 2,
@@ -61,7 +62,7 @@ class VehicleIdentificationNumber extends AbstractValidator
     /**
      * @var array<int, int>
      */
-    private array $charWeights = [
+    protected array $charWeights = [
         1  => 8,
         2  => 7,
         3  => 6,
@@ -80,9 +81,25 @@ class VehicleIdentificationNumber extends AbstractValidator
         17 => 2,
     ];
 
+    protected $options = [
+        'strict' => false,
+    ];
+
     public function __construct(Traversable|array|null $options = null)
     {
         parent::__construct($options);
+    }
+
+    public function setStrict(bool $strict): self
+    {
+        $this->options['strict'] = $strict;
+
+        return $this;
+    }
+
+    public function getStrict(): bool
+    {
+        return $this->options['strict'];
     }
 
     /**
@@ -115,7 +132,10 @@ class VehicleIdentificationNumber extends AbstractValidator
 
         $currentCn = mb_substr($value, 8, 1, 'utf8');
 
-        if (preg_match('~^[1-5]~', $value)) {
+        if (
+            $this->getStrict() && preg_match('~^.{8}[0-9X]~', $value)
+            || preg_match('~^[1-5]~', $value)
+        ) {
             $sum = 0;
             for ($i = 1; $i < 18; $i++) {
                 if (9 === $i) {
