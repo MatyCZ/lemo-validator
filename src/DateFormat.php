@@ -27,10 +27,10 @@ class DateFormat extends AbstractValidator
     ];
 
     /**
-     * @var array<string|string>
+     * @var array<string, array<string, string>>
      */
     protected array $messageVariables = [
-        'format' => 'format',
+        'format' => ['options' => 'format'],
     ];
 
     /** @var array{format: string|null} */

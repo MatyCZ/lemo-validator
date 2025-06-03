@@ -56,15 +56,21 @@ class BirthNumberCZMinorChild extends AbstractValidator
 
         $this->setValue($value);
 
-        if (!preg_match('#^\s*(\d\d)(\d\d)(\d\d)(\d\d\d)(\d?)\s*$#', $value, $matches)) {
+        if (!preg_match('~^\s*(\d\d)(\d\d)(\d\d)(\d\d\d)(\d?)\s*$~', preg_quote($value, '~'), $matches)) {
             $this->error(self::NOT_BIRTHNUMBER);
             return false;
         }
 
-        [, $year, $month, $day, $ext, $c] = $matches;
+        [, $yearParsed, $monthParsed, $dayParsed, $ext, $checkDigitParsed] = $matches;
+
+        // Prevedeme naparsovane hodnoty na cisla
+        $checkDigit = (int) $checkDigitParsed;
+        $day = (int) $dayParsed;
+        $month = (int) $monthParsed;
+        $year = (int) $yearParsed;
 
         // Do roku 1954 pridelovano 9 mistne RC nelze overit
-        if ($c === '') {
+        if ($checkDigitParsed === '') {
             return true;
         }
 
@@ -73,13 +79,13 @@ class BirthNumberCZMinorChild extends AbstractValidator
         if ($mod === 10) {
             $mod = 0;
         }
-        if ($mod !== (int) $c) {
+        if ($mod !== $checkDigit) {
             $this->error(self::NOT_BIRTHNUMBER);
             return false;
         }
 
         // Kontrola data
-        $year += $year < 54 ? 2000 : 1900;
+        $year += ($year < 54 ? 2000 : 1900);
 
         // K mesici muze byt pricteno 20, 50 nebo 70
         if ($month > 70 && $year > 2003) {

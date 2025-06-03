@@ -25,10 +25,10 @@ class DateLessThan extends AbstractValidator
     ];
 
     /**
-     * @var array<string|string>
+     * @var array<string, array<string, string>>
      */
     protected array $messageVariables = [
-        'max' => 'max',
+        'max' => ['options' => 'max'],
     ];
 
     /** @var array{inclusive: bool, max: string|null} */
