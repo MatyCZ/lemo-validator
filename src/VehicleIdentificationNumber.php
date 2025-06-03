@@ -3,7 +3,6 @@
 namespace Lemo\Validator;
 
 use Laminas\Validator\AbstractValidator;
-use Traversable;
 
 use function intval;
 use function is_numeric;
@@ -14,21 +13,25 @@ use function strcmp;
 
 class VehicleIdentificationNumber extends AbstractValidator
 {
-    public const VIN_INVALID        = 'vinInvalid';
-    public const VIN_INVALID_CHARS  = 'vinInvalidChars';
+    public const VIN_INVALID = 'vinInvalid';
+    public const VIN_INVALID_CHARS = 'vinInvalidChars';
     public const VIN_INVALID_LENGTH = 'vinInvalidLength';
-    public const VIN_INVALID_CN     = 'vinInvalidCn';
-    public const VIN_TOO_LONG       = 'vinTooLong';
+    public const VIN_INVALID_CONSECUTIVE_ONES = 'vinInvalidConsecutiveOnes';
+    public const VIN_INVALID_CONSECUTIVE_ZEROS = 'vinInvalidConsecutiveZeros';
+    public const VIN_INVALID_CN = 'vinInvalidCn';
+    public const VIN_TOO_LONG = 'vinTooLong';
 
     /**
      * @var array<string, string>
      */
     protected array $messageTemplates = [
-        self::VIN_INVALID        => "Invalid type given. String expected",
-        self::VIN_INVALID_CHARS  => "The value contains invalid characters",
+        self::VIN_INVALID => "Invalid type given. String expected",
+        self::VIN_INVALID_CHARS => "The value contains invalid characters",
+        self::VIN_INVALID_CN => "Invalid control number",
+        self::VIN_INVALID_CONSECUTIVE_ONES => "The value contains consecutive ones",
+        self::VIN_INVALID_CONSECUTIVE_ZEROS => "The value contains consecutive zeros",
         self::VIN_INVALID_LENGTH => "Invalid value length",
-        self::VIN_INVALID_CN     => "Invalid control number",
-        self::VIN_TOO_LONG       => "The value is greater than 17 characters"
+        self::VIN_TOO_LONG => "The value is greater than 17 characters"
     ];
 
     /**
@@ -88,18 +91,7 @@ class VehicleIdentificationNumber extends AbstractValidator
     ];
 
     /**
-     * @param Traversable<string, bool>|array{strict?: bool}|null $options
-     */
-    public function __construct(Traversable|array|null $options = null)
-    {
-        parent::__construct($options);
-    }
-
-    /**
-     * Returns true if and only if $value is a valid integer
-     *
-     * @param  string|integer $value
-     * @return bool
+     * @param string|integer $value
      */
     public function isValid($value): bool
     {
@@ -108,29 +100,44 @@ class VehicleIdentificationNumber extends AbstractValidator
             return false;
         }
 
-        $result = true;
         $value = (string) $value;
 
         $valueLength = mb_strlen($value, 'utf8');
         if ($valueLength > 17) {
             $this->error(self::VIN_TOO_LONG);
-            $result = false;
+
+            return false;
         }
 
         if ($valueLength > 8 && $valueLength < 17 || true === $this->getStrict() && 17 !== $valueLength) {
             $this->error(self::VIN_INVALID_LENGTH);
-            $result = false;
+
+            return false;
         }
 
-        if (!preg_match('~^[0-9A-Z]+$~', $value) || preg_match('~(I|Q|O)~', $value)) {
+        if (!preg_match('~^[0-9A-Z]+$~', $value) || preg_match('~(I|O|Q)~', $value)) {
             $this->error(self::VIN_INVALID_CHARS);
-            $result = false;
+
+            return false;
         }
 
-        if (true === $result && true === $this->getStrict() && 17 === $valueLength) {
+        if (preg_match('/0{5}/', $value)) {
+            $this->error(self::VIN_INVALID_CONSECUTIVE_ZEROS);
+
+            return false;
+        }
+
+        if (preg_match('/1{5}/', $value)) {
+            $this->error(self::VIN_INVALID_CONSECUTIVE_ONES);
+
+            return false;
+        }
+
+        if (true === $this->getStrict() && 17 === $valueLength) {
             $currentCn = mb_substr($value, 8, 1, 'utf8');
 
-            if (preg_match('~^[1-5]{3}~', $value)
+            if (
+                preg_match('~^[1-5]{3}~', $value)
                 && preg_match('~^[0-9X]{1}$~', $currentCn)
             ) {
                 $sum = 0;
@@ -144,8 +151,8 @@ class VehicleIdentificationNumber extends AbstractValidator
 
                     if (null === $charValue) {
                         $this->error(self::VIN_INVALID_CHARS);
-                        $result = false;
-                        break;
+
+                        return false;
                     }
 
                     $sum += $charValue * $this->charWeights[$i];
@@ -158,22 +165,17 @@ class VehicleIdentificationNumber extends AbstractValidator
 
                 if (0 !== strcmp((string) $cn, $currentCn)) {
                     $this->error(self::VIN_INVALID_CN);
-                    $result = false;
+
+                    return false;
                 }
             }
         }
 
-        if (true === $result) {
-            $this->setValue($value);
-        }
+        $this->setValue($value);
 
-        return $result;
+        return true;
     }
 
-    /**
-     * @param  string $char
-     * @return int|null
-     */
     protected function getCharValue(string $char): ?int
     {
         if (is_numeric($char)) {
