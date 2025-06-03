@@ -3,7 +3,6 @@
 namespace Lemo\Validator;
 
 use Laminas\Validator\AbstractValidator;
-use Traversable;
 
 use function intval;
 use function is_numeric;
@@ -15,19 +14,23 @@ use function strcmp;
 
 class VehicleIdentificationNumber extends AbstractValidator
 {
-    public const VIN_INVALID        = 'vinInvalid';
-    public const VIN_INVALID_CHARS  = 'vinInvalidChars';
+    public const VIN_INVALID = 'vinInvalid';
+    public const VIN_INVALID_CHARS = 'vinInvalidChars';
+    public const VIN_INVALID_CN = 'vinInvalidCn';
+    public const VIN_INVALID_CONSECUTIVE_ONES = 'vinInvalidConsecutiveOnes';
+    public const VIN_INVALID_CONSECUTIVE_ZEROS = 'vinInvalidConsecutiveZeros';
     public const VIN_INVALID_LENGTH = 'vinInvalidLength';
-    public const VIN_INVALID_CN     = 'vinInvalidCn';
 
     /**
      * @var array<string, string>
      */
     protected array $messageTemplates = [
-        self::VIN_INVALID        => "Invalid type given. String expected",
-        self::VIN_INVALID_CHARS  => "The value contains invalid characters",
+        self::VIN_INVALID => "Invalid type given. String expected",
+        self::VIN_INVALID_CHARS => "The value contains invalid characters",
+        self::VIN_INVALID_CN => "Invalid control number",
+        self::VIN_INVALID_CONSECUTIVE_ONES => "The value contains consecutive ones",
+        self::VIN_INVALID_CONSECUTIVE_ZEROS => "The value contains consecutive zeros",
         self::VIN_INVALID_LENGTH => "Invalid value length",
-        self::VIN_INVALID_CN     => "Invalid control number",
     ];
 
     /**
@@ -81,14 +84,10 @@ class VehicleIdentificationNumber extends AbstractValidator
         17 => 2,
     ];
 
+    /** @var array{strict: bool} */
     protected $options = [
         'strict' => false,
     ];
-
-    public function __construct(Traversable|array|null $options = null)
-    {
-        parent::__construct($options);
-    }
 
     public function setStrict(bool $strict): self
     {
@@ -126,6 +125,18 @@ class VehicleIdentificationNumber extends AbstractValidator
 
         if (!preg_match('~^[0-9A-Z]+$~', $value) || preg_match('~([IQO])~', $value)) {
             $this->error(self::VIN_INVALID_CHARS);
+
+            return false;
+        }
+
+        if (preg_match('/0{5}/', $value)) {
+            $this->error(self::VIN_INVALID_CONSECUTIVE_ZEROS);
+
+            return false;
+        }
+
+        if (preg_match('/1{5}/', $value)) {
+            $this->error(self::VIN_INVALID_CONSECUTIVE_ONES);
 
             return false;
         }
@@ -171,10 +182,6 @@ class VehicleIdentificationNumber extends AbstractValidator
         return true;
     }
 
-    /**
-     * @param  string $char
-     * @return int|null
-     */
     protected function getCharValue(string $char): ?int
     {
         if (is_numeric($char)) {
