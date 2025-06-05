@@ -129,13 +129,13 @@ class VehicleIdentificationNumber extends AbstractValidator
             return false;
         }
 
-        if (preg_match('/0{5}/', $value)) {
+        if (preg_match('/0{7}/', $value)) {
             $this->error(self::VIN_INVALID_CONSECUTIVE_ZEROS);
 
             return false;
         }
 
-        if (preg_match('/1{5}/', $value)) {
+        if (preg_match('/1{6}/', $value)) {
             $this->error(self::VIN_INVALID_CONSECUTIVE_ONES);
 
             return false;
