@@ -84,10 +84,23 @@ class VehicleIdentificationNumber extends AbstractValidator
         17 => 2,
     ];
 
-    /** @var array{strict: bool} */
+    /** @var array{allowLongSequences: bool, strict: bool} */
     protected $options = [
+        'allowLongSequences' => true,
         'strict' => false,
     ];
+
+    public function setAllowLongSequences(bool $allowLongSequences): self
+    {
+        $this->options['allowLongSequences'] = $allowLongSequences;
+
+        return $this;
+    }
+
+    public function getAllowLongSequences(): bool
+    {
+        return $this->options['allowLongSequences'];
+    }
 
     public function setStrict(bool $strict): self
     {
@@ -129,13 +142,13 @@ class VehicleIdentificationNumber extends AbstractValidator
             return false;
         }
 
-        if (preg_match('/0{7}/', $value)) {
+        if (true !== $this->getAllowLongSequences() && preg_match('/0{7}/', $value)) {
             $this->error(self::VIN_INVALID_CONSECUTIVE_ZEROS);
 
             return false;
         }
 
-        if (preg_match('/1{6}/', $value)) {
+        if (true !== $this->getAllowLongSequences() && preg_match('/1{6}/', $value)) {
             $this->error(self::VIN_INVALID_CONSECUTIVE_ONES);
 
             return false;
