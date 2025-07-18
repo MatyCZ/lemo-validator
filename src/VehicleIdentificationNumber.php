@@ -144,8 +144,8 @@ class VehicleIdentificationNumber extends AbstractValidator
         $currentCn = mb_substr($value, 8, 1, 'utf8');
 
         if (
-            $this->getStrict() && preg_match('~^.{8}[0-9X]~', $value)
-            || preg_match('~^[1-5]~', $value)
+            $this->getStrict() && (preg_match('~^.{8}[0-9X]~', $value)
+            || preg_match('~^[1-5]~', $value))
         ) {
             $sum = 0;
             for ($i = 1; $i < 18; $i++) {
